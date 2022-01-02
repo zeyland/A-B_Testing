@@ -1,0 +1,98 @@
+######################################################
+# AB Testing
+######################################################
+
+import itertools
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.stats.api as sms
+from scipy.stats import ttest_1samp, shapiro, levene, ttest_ind, mannwhitneyu, pearsonr, spearmanr, kendalltau, \
+    f_oneway, kruskal
+from statsmodels.stats.proportion import proportions_ztest
+
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', 10)
+pd.set_option('display.float_format', lambda x: '%.5f' % x)
+df_c = pd.read_excel("Dataset/ab_testing.xlsx",
+                    sheet_name="Control Group")
+df_t = pd.read_excel("Dataset/ab_testing.xlsx",
+                    sheet_name="Test Group")
+
+#Control group
+df_c["control_click_imp"] = df_c["Click"]/df_c["Impression"]*100
+#100 impressiondan x kişi click.
+
+df_c["control_purc_click"] = df_c["Purchase"]/df_c["Click"]*100
+#100 clikten x purchase.
+
+df_c["control_final_purch"] = df_c["control_click_imp"]*df_c["control_purc_click"]
+df_c.drop("Earning", axis=1, inplace=True)
+
+df_c.sort_values("control_final_purch", ascending=False)
+
+#Test Group
+df_t
+df_t["test_click_imp"] = df_c["Click"]/df_c["Impression"]*100
+#100 impressiondan x kişi click.
+
+df_t["test_purc_click"] = df_c["Purchase"]/df_c["Click"]*100
+#100 clikten x purchase.
+
+#purchase * purchase*1000/Click*Impression
+#click_imp * purc_click - 1000 üzerinden kıyas.
+
+df_t["test_final_purch"] = df_t["test_click_imp"]*df_t["test_purc_click"]
+df_t.drop("Earning", axis=1, inplace=True)
+
+df_t.sort_values("test_final_purch", ascending=False)
+
+
+
+# H0: Control Group Normal dağılım varsayımı sağlanmaktadır.
+# H1:..sağlanmamaktadır.
+
+test_stat, pvalue = shapiro(df_c["control_final_purch"])
+print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
+#normallik varsayımı oke.
+# 0.8844 > 0.05 reddedilemez.
+
+test_stat, pvalue = levene(df_c["control_final_purch"].dropna(),
+                           df_c["control_final_purch"].dropna())
+
+print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
+# 0.1 > 0.05 reddedilemez.
+
+##################################3
+# H0: Test Group Normal dağılım varsayımı sağlanmaktadır.
+# H1:..sağlanmamaktadır.
+
+test_stat, pvalue = shapiro(df_t["test_final_purch"])
+print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
+#normallik varsayımı oke.
+# 0.9857 > 0.05 reddedilemez.
+
+test_stat, pvalue = levene(df_t["test_final_purch"].dropna(),
+                           df_t["test_final_purch"].dropna())
+
+print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
+# 0.1 > 0.05 reddedilemez.
+
+############################
+# Varsayımlar sağlandı bağımsız iki örneklem t testi (parametrik test)
+############################
+
+test_stat, pvalue = ttest_ind(df_c["control_final_purch"],
+                              df_t["test_final_purch"],
+                              equal_var=True)
+
+print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
+
+
+
+test_stat, pvalue = ttest_ind(df_c["control_purc_click"],
+                              df_t["test_purc_click"],
+                              equal_var=True)
+
+print('Test Stat = %.4f, p-value = %.4f' % (test_stat, p
