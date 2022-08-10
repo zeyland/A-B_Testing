@@ -51,7 +51,7 @@ df_t.sort_values("test_final_purch", ascending=False)
 
 
 # H0: Control Group Normal dağılım varsayımı sağlanmaktadır.
-# H1:..sağlanmamaktadır.
+# H1:ontrol Group Normal dağılım varsayımı sağlanMAmaktadır.
 
 test_stat, pvalue = shapiro(df_c["control_final_purch"])
 print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
@@ -70,7 +70,9 @@ print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
 
 test_stat, pvalue = shapiro(df_t["test_final_purch"])
 print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
-#normallik varsayımı oke.
+#normallik varsayımı sağlanmıştır. 
+
+Test sonucu_ p value: 
 # 0.9857 > 0.05 reddedilemez.
 
 test_stat, pvalue = levene(df_t["test_final_purch"].dropna(),
